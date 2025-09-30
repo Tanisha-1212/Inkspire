@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import {
   createBlog,
-  getAllBlog,
+  getAllBlogs,
   getBlogById,
   updateBlog,
   deleteBlog,
@@ -10,7 +10,7 @@ import {
   getBlogLikes,
 } from "../api/blogApi";
 
-import {getComments, addComment, deleteComment} from "../api/commentApi";
+import {getCommentByBlog, addComment, deleteComment} from "../api/commentApi";
 
 const BlogContext = createContext();
 
@@ -22,7 +22,7 @@ export const BlogProvider = ({ children }) => {
   const fetchAllBlogs = async () => {
     setLoading(true);
     try {
-      const data = await getAllBlog();
+      const data = await getAllBlogs();
       setBlogs(data);
     } catch (err) {
       console.error("Failed to fetch all blogs:", err);
@@ -125,7 +125,7 @@ export const BlogProvider = ({ children }) => {
   // Fetch comments for a blog
   const fetchComments = async (blogId) => {
     try {
-      const comments = await getComments(blogId);
+      const comments = await getCommentByBlog(blogId);
       setBlogs((prev) =>
         prev.map((b) => (b._id === blogId ? { ...b, comments } : b))
       );

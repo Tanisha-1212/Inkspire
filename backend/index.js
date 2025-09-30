@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const rateLimit = require("express-rate-limiter");
+const rateLimit = require('express-rate-limit');
 const connectDB = require("./config/db");
+const dotenv = require("dotenv");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
