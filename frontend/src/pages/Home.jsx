@@ -1,5 +1,5 @@
 import DotsBackground from "../components/DotsBackground";
-
+import {Link} from "react-router-dom";
 export default function LandingPage() {
 
   return (
@@ -20,9 +20,9 @@ export default function LandingPage() {
           <button className=" text-green-400 border border-green-400 px-6 py-3 rounded-md font-semibold  transform transition duration-300 hover:scale-105">
             Get Started
           </button>
-          <button className="border border-green-400 text-green-400 px-6 py-3 rounded-md font-semibold transform transition duration-300 hover:scale-105">
+          <Link to="/explore" className="border border-green-400 text-green-400 px-6 py-3 rounded-md font-semibold transform transition duration-300 hover:scale-105">
             Explore Blogs
-          </button>
+          </Link>
         </div>
       </section>
 

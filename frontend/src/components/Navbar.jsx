@@ -27,7 +27,7 @@ export default function Navbar() {
           Home
         </Link>
         <Link
-          to="/blogs"
+          to="/explore"
           className="hover:text-green-400 transition-colors transform hover:scale-110"
         >
           Blogs
@@ -69,7 +69,7 @@ export default function Navbar() {
       {/* Greeting */}
       {isAuthenticated && (
         <div className="ml-4 text-green-400 text-sm">
-          Hi, {user?.name || "User"}
+          Hi, {user?.username || "User"}
         </div>
       )}
     </nav>

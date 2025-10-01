@@ -50,8 +50,8 @@ export default function SignupPage() {
             <label className="block text-sm mb-2">Name</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               placeholder="Enter your name"
               required

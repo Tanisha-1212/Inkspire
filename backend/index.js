@@ -5,6 +5,9 @@ const rateLimit = require('express-rate-limit');
 const connectDB = require("./config/db");
 const dotenv = require("dotenv");
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const blogRoutes = require("./routes/blogRoutes");
@@ -14,7 +17,6 @@ const notificationRoutes = require("./routes/notificationRoutes");
 dotenv.config();
 connectDB();
 
-app.use(express.json());
 app.use(cors({origin: "http://localhost:5173", credentials: true}));
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

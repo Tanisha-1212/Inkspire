@@ -10,7 +10,7 @@ export const createBlog = async (data) => {
     }
 };
 
-export const getAllBlogs = async () => {
+export const getAllBlogs = async (data) => {
     try {
         const response = await API.get("/blogs", data);
         return response.data.blogs;
