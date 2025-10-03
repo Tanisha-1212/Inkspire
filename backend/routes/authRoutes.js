@@ -9,6 +9,6 @@ router.post("/login", login);
 
 router.post("/logout", isLoggedIn, logout);
 
-router.get("/me", verifyToken, getCurrentUser);
+router.get("/me",isLoggedIn, verifyToken, getCurrentUser);
 
 module.exports = router;

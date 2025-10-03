@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import { useUser } from "../context/userContext";
-import { useBlogs } from "../context/BlogContext";
+import { useBlogs } from "../context/blogContext";
 import { useNotifications } from "../context/NotificationContext";
 import { Heart } from "lucide-react";
 
-export default function ProfilePage() {
-  const { id } = useParams();
+export default function Profile() {
   const navigate = useNavigate();
 
+  // Current logged-in user
   const { user: currentUser } = useAuth();
-  const { profile, followers, following, userBlogs, fetchUserProfile, fetchFollowers, fetchFollowing, fetchUserBlogs, updateUserProfile } = useUser();
+
+  // User context
+  const {
+    profile,
+    followers,
+    following,
+    userBlogs,
+    fetchUserProfile,
+    fetchFollowers,
+    fetchFollowing,
+    fetchUserBlogs,
+    updateUserProfile,
+    follow,
+    unfollow
+  } = useUser();
+
+  // Blogs + Notifications
   const { likeBlogPost } = useBlogs();
   const { notifications, fetchNotifications } = useNotifications();
 
@@ -23,15 +39,20 @@ export default function ProfilePage() {
   const [editBio, setEditBio] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
 
-  // Load profile, followers, following, blogs, notifications
+  // Fetch profile data for current user only
   useEffect(() => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
     const loadProfileData = async () => {
       setLoading(true);
       try {
-        await fetchUserProfile(id);
-        await fetchFollowers(id);
-        await fetchFollowing(id);
-        await fetchUserBlogs(id);
+        await fetchUserProfile(currentUser._id);
+        await fetchFollowers(currentUser._id);
+        await fetchFollowing(currentUser._id);
+        await fetchUserBlogs(currentUser._id);
         await fetchNotifications();
       } catch (err) {
         console.error("Error loading profile:", err);
@@ -41,8 +62,9 @@ export default function ProfilePage() {
     };
 
     loadProfileData();
-  }, [id]);
+  }, [currentUser]);
 
+  // Sync edit form with profile data
   useEffect(() => {
     if (profile) {
       setEditUsername(profile.username);
@@ -51,6 +73,7 @@ export default function ProfilePage() {
     }
   }, [profile]);
 
+  // Like handler
   const handleLike = async (blogId) => {
     if (!currentUser) {
       navigate("/login");
@@ -59,22 +82,7 @@ export default function ProfilePage() {
     await likeBlogPost(blogId);
   };
 
-  const handleFollow = async () => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-    try {
-      if (following.includes(profile._id)) {
-        await unfollow(profile._id);
-      } else {
-        await follow(profile._id);
-      }
-    } catch (err) {
-      console.error("Follow/unfollow failed:", err);
-    }
-  };
-
+  // Update profile
   const handleProfileUpdate = async () => {
     try {
       await updateUserProfile({
@@ -88,10 +96,10 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="text-center text-green-400 mt-20">Loading profile...</div>;
-  if (!profile) return <div className="text-center text-red-500 mt-20">User not found.</div>;
-
-  const isOwner = currentUser && currentUser._id === profile._id;
+  if (loading)
+    return <div className="text-center text-green-400 mt-20">Loading profile...</div>;
+  if (!profile)
+    return <div className="text-center text-red-500 mt-20">User not found.</div>;
 
   return (
     <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10">
@@ -107,14 +115,12 @@ export default function ProfilePage() {
             <>
               <h1 className="text-3xl font-bold text-green-400">{profile.username}</h1>
               <p className="text-gray-400">{profile.bio || "No bio available."}</p>
-              {isOwner && (
-                <button
-                  onClick={() => setEditing(true)}
-                  className="mt-2 px-4 py-2 bg-green-400 text-black rounded-md font-semibold hover:bg-green-500 transition"
-                >
-                  Edit Profile
-                </button>
-              )}
+              <button
+                onClick={() => setEditing(true)}
+                className="mt-2 px-4 py-2 bg-green-400 text-black rounded-md font-semibold hover:bg-green-500 transition"
+              >
+                Edit Profile
+              </button>
             </>
           ) : (
             <div className="flex flex-col gap-2">
@@ -150,23 +156,45 @@ export default function ProfilePage() {
                   Cancel
                 </button>
               </div>
+
             </div>
           )}
+          {/* Show follow button only if viewing another user's profile */}
+          {currentUser._id !== profile._id && (
+          <button
+            onClick={async () => {
+              try {
+                // Check if currentUser is in followers
+                const isFollowing = followers.some((f) => f._id === currentUser._id);
 
-          <div className="flex gap-4 mt-2">
-            <span className="text-gray-400">Followers: {followers.length}</span>
-            <span className="text-gray-400">Following: {following.length}</span>
-          </div>
+                if (isFollowing) {
+                  await unfollow(profile._id); // context function
+                } else {
+                  await follow(profile._id); // context function
+                }
 
-          {!isOwner && currentUser && (
-            <button
-              onClick={handleFollow}
-              className="mt-2 px-4 py-2 bg-green-400 text-black rounded-md font-semibold hover:bg-green-500 transition"
-            >
-              {following.includes(profile._id) ? "Unfollow" : "Follow"}
-            </button>
-          )}
+                await fetchFollowers(profile._id); // refresh followers
+              } catch (err) {
+                console.error("Follow/unfollow failed:", err);
+              }
+            }}
+            className={`ml-4 px-4 py-2 rounded-md font-semibold transition ${
+              followers.some((f) => f._id === currentUser._id)
+                ? "bg-gray-700 text-white hover:bg-gray-600"
+                : "bg-green-400 text-black hover:bg-green-500"
+            }`}
+          >
+            {followers.some((f) => f._id === currentUser._id) ? "Unfollow" : "Follow"}
+          </button>
+        )}
+
+      <div className="flex gap-4 mt-2 items-center">
+        <span className="text-gray-400">Followers: {followers.length}</span>
+        <span className="text-gray-400">Following: {following.length}</span>
+
         </div>
+    </div>
+
       </div>
 
       {/* Notifications */}
@@ -175,7 +203,12 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-green-400 mb-4">Notifications</h2>
           <ul className="space-y-2">
             {notifications.map((n) => (
-              <li key={n.id} className={`p-3 rounded-md ${n.read ? "bg-gray-900" : "bg-green-400 text-black"}`}>
+              <li
+                key={n.id}
+                className={`p-3 rounded-md ${
+                  n.read ? "bg-gray-900" : "bg-green-400 text-black"
+                }`}
+              >
                 {n.message}
               </li>
             ))}
@@ -185,7 +218,9 @@ export default function ProfilePage() {
 
       {/* User Blogs */}
       <div>
-        <h2 className="text-2xl font-bold text-green-400 mb-4">Blogs by {profile.username}</h2>
+        <h2 className="text-2xl font-bold text-green-400 mb-4">
+          Blogs by {profile.username}
+        </h2>
         {userBlogs.length === 0 ? (
           <p className="text-gray-400">No blogs yet.</p>
         ) : (
@@ -197,12 +232,20 @@ export default function ProfilePage() {
                 onClick={() => navigate(`/blog/${blog._id}`)}
               >
                 {blog.pictures && blog.pictures[0] && (
-                  <img src={blog.pictures[0]} alt={blog.title} className="w-full h-48 object-cover" />
+                  <img
+                    src={blog.pictures[0]}
+                    alt={blog.title}
+                    className="w-full h-48 object-cover"
+                  />
                 )}
                 <div className="p-4">
-                  <h3 className="text-xl font-bold text-green-400 mb-2">{blog.title}</h3>
+                  <h3 className="text-xl font-bold text-green-400 mb-2">
+                    {blog.title}
+                  </h3>
                   <p className="text-gray-300 mb-2">
-                    {blog.description.length > 100 ? blog.description.slice(0, 100) + "..." : blog.description}
+                    {blog.description.length > 100
+                      ? blog.description.slice(0, 100) + "..."
+                      : blog.description}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <button

@@ -15,7 +15,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer"
 
 // Hooks
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/authContext";
 
 export default function App() {
   const { user } = useAuth();
@@ -38,6 +38,7 @@ export default function App() {
             <Route path="/blog/:id" element={<SingleBlog />} />
 
             <Route path="/profile" element={<Profile/>} />
+
             {/* 404 Page */}
             <Route path="/notFound" element={<NotFound />} />
           </Routes>

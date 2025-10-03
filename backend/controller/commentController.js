@@ -3,7 +3,7 @@ const Blog = require("../models/Blog");
 
 exports.addComment = async(req, res)=>{
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const blogId = req.params.id;
         const {content} = req.body;
 
@@ -21,12 +21,11 @@ exports.addComment = async(req, res)=>{
             creator: userId,
             blog: blogId
         });
+        
 
         blog.comments.push(comment._id);
         await blog.save();
-
         await comment.populate("creator", "username profilePic");
-
         res.status(201).json({comment});
     } catch (err) {
         return res.status(500).json({message: "Server error", error: err.message});
@@ -35,7 +34,7 @@ exports.addComment = async(req, res)=>{
 
 exports.deleteComment = async(req, res) =>{
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const commentId = req.params.id;
 
         const comment = await Comment.findById(commentId);
@@ -62,12 +61,12 @@ exports.deleteComment = async(req, res) =>{
 exports.getCommentByBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
-
+    
     const blog = await Blog.findById(blogId).populate({
-      path: "comments",
+      path: "comments",       // populate comments array
       populate: {
-        path: "creator", // also fetch comment creator details
-        select: "username profilePic",
+        path: "creator",         // populate the user who created each comment
+        select: "username profilePic", // select only needed fields
       },
     });
 
@@ -75,16 +74,19 @@ exports.getCommentByBlog = async (req, res) => {
       return res.status(404).json({ message: "Blog not found" });
     }
 
+    
     res.status(200).json({ comments: blog.comments });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 
+
 exports.updateComment = async(req, res) =>{
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const commentId = req.params.id;
         const {content} = req.body;
 

@@ -20,9 +20,9 @@ export const loginUser = async(data) => {
     }
 };
 
-export const logout = async () => {
+export const logout = async (data) => {
     try {
-        const response = await API.post("/auth/logout");
+        const response = await API.post("/auth/logout", data);
         return response.data;
     } catch (err) {
         console.error("Error logging out", err);

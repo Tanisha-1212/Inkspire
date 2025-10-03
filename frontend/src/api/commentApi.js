@@ -1,8 +1,8 @@
 import API from "./api";
 
-export const addComment = async (id) => {
+export const addComment = async (id, data) => {
     try {
-        const response = await API.post(`/comments/${id}`);
+        const response = await API.post(`/comments/${id}`, data);
         return response.data;
     } catch (err) {
         console.error("Error adding comment:", err);

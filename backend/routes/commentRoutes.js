@@ -8,11 +8,11 @@ const {
     updateComment
 } = require("../controller/commentController");
 
-router.post("/:blogId", isLoggedIn, addComment);
+router.post("/:id", isLoggedIn, addComment);
 
 router.delete("/:id", isLoggedIn, deleteComment);
 
-router.get("/blog/:blogId", isLoggedIn, getCommentByBlog);
+router.get("/blog/:id", isLoggedIn, getCommentByBlog);
 
 router.put("/:id", isLoggedIn, updateComment);
 

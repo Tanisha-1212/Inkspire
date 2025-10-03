@@ -116,7 +116,7 @@ exports.deleteBlog = async(req, res) => {
 
 exports.likeBlog = async(req, res) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user._id;
         const blogId = req.params.id;
 
         const blog = await Blog.findById(blogId);

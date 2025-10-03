@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useBlogs } from "../context/BlogContext";
-import { useAuth } from "../context/AuthContext";
+import { useBlogs } from "../context/blogContext";
+import { useAuth } from "../context/authContext";
 import { Heart } from "lucide-react";
 
 export default function SingleBlogPage() {
@@ -45,14 +45,19 @@ export default function SingleBlogPage() {
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
-    const comment = await addBlogComment(blog._id, { text: newComment, user: user._id });
-    setComments([comment, ...comments]);
-    setNewComment("");
+    if (!newComment.trim()) return;
+
+    try {
+      const { comment } = await addBlogComment(blog._id, { content: newComment });
+      setComments([comment, ...comments]);
+      setNewComment("");
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
   };
 
   const handleCommentFocus = () => {
@@ -89,7 +94,12 @@ export default function SingleBlogPage() {
       <div className="flex items-center gap-2 mb-6">
         <button
           onClick={handleLike}
-          className="flex items-center gap-2 text-green-400 hover:text-green-500 transition"
+          disabled={!isAuthenticated} // disable for non-logged-in users
+          className={`flex items-center gap-2 transition ${
+            isAuthenticated
+              ? "text-green-400 hover:text-green-500"
+              : "text-gray-600 cursor-not-allowed"
+          }`}
         >
           <Heart className="w-5 h-5" />
           <span>{blog.totalLikes || 0}</span>
@@ -106,12 +116,20 @@ export default function SingleBlogPage() {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onFocus={handleCommentFocus}
-            placeholder="Add a comment..."
-            className="flex-1 px-4 py-2 rounded-md bg-black text-white focus:outline-none w-72"
+            placeholder={isAuthenticated ? "Add a comment..." : "Login to comment"}
+            disabled={!isAuthenticated}
+            className={`flex-1 px-4 py-2 rounded-md bg-black text-white focus:outline-none w-72 ${
+              !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           />
           <button
             onClick={handleAddComment}
-            className="bg-green-400 text-black px-4 py-2 rounded-md font-semibold hover:bg-green-500 transition"
+            disabled={!isAuthenticated}
+            className={`px-4 py-2 rounded-md font-semibold transition ${
+              isAuthenticated
+                ? "bg-green-400 text-black hover:bg-green-500"
+                : "bg-gray-600 text-gray-300 cursor-not-allowed"
+            }`}
           >
             Post
           </button>
@@ -122,9 +140,15 @@ export default function SingleBlogPage() {
           <p className="text-gray-400">No comments yet.</p>
         ) : (
           comments.map((c) => (
-            <div key={c._id} className="border-b border-gray-700 py-2">
+            <div key={c._id} className="border-b border-gray-700 py-3">
               <p className="text-gray-300">
-                <span className="text-green-400 font-semibold">{c.user?.name || "User"}:</span> {c.text}
+                <img
+                  src={c.creator?.profilePic || "/default-avatar.png"}
+                  alt={c.creator?.username || "User"}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <span className="text-green-400 font-semibold">{c.creator?.username}:</span>{" "}
+                {c.content}
               </p>
             </div>
           ))
@@ -133,4 +157,5 @@ export default function SingleBlogPage() {
     </div>
   );
 }
+
 

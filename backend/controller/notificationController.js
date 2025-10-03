@@ -3,7 +3,7 @@ const Notification = require("../models/Notification");
 
 exports.createNotifications = async(req, res) => {
     try {
-        const receiverId = req.user.id;
+        const receiverId = req.user._id;
         const {type, fromUserId, blogId, commentId} = req.body;
 
         if(!type || !fromUserId || !receiverId){
@@ -29,7 +29,7 @@ exports.createNotifications = async(req, res) => {
 
 exports.getNotifications = async(req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
 
         const notifications = await Notification.find({user: userId})
         .populate("fromUser", "username profilePic")
@@ -45,7 +45,7 @@ exports.getNotifications = async(req, res) => {
 
 exports.markAsRead = async(req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
 
         const notificationId = req.params.id;
 

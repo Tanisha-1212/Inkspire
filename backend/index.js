@@ -4,9 +4,11 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const connectDB = require("./config/db");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");

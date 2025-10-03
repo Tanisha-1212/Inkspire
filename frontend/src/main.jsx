@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 
 // Import all context providers
-import { AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider } from "./context/authContext.jsx";
 import { BlogProvider } from "./context/blogContext.jsx";
 import { UserProvider } from "./context/userContext";
 import { NotificationProvider } from "./context/NotificationContext.jsx";

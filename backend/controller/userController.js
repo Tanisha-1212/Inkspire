@@ -1,26 +1,23 @@
 const User = require('../models/User');
 const Blog = require('../models/Blog');
 
-exports.getUserProfile  = async (req, res)=>{
-    try{
-    const userId = req.params.id;
+// GET /api/users/:id
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const user = await User.findById(userId).select("-password");
+    res.status(200).json({ user });
+  } catch (err) {
+    console.error("Error fetching user profile:", err);
+    res.status(500).json({ message: "Server error while fetching user profile" });
+  }
+};
 
-    if(!user){
-        return res.status(401).json({message: "User not found"});
-    }
-
-    res.status(200).json({user});
-    }
-    catch(err){
-        return res.status(500).json({message: "Server error", error: err.message});
-    }
-}
 
 exports.updateProfile = async(req, res) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user._id;
 
         const {username, profilePic, bio} = req.body;
 
@@ -44,7 +41,7 @@ exports.updateProfile = async(req, res) => {
 
 exports.followUser = async(req, res) =>{
     try{
-    const userId  = req.user.id;
+    const userId  = req.user._id;
     const targetUserId = req.params.id;
 
     if(userId === targetUserId){
@@ -77,7 +74,7 @@ exports.followUser = async(req, res) =>{
 
 exports.unfollowUser = async(req, res) => {
     try{
-        const userId = req.user.id;
+        const userId = req.user._id;
         const targetUserId = req.params.id;
 
         const user = await User.findById(userId);
@@ -107,7 +104,7 @@ exports.unfollowUser = async(req, res) => {
 
 exports.getFollowers = async (req, res) => {
     try{
-        const userId = req.params.id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId).select("-password").populate("followers", "username profilePic");
 
@@ -124,7 +121,7 @@ exports.getFollowers = async (req, res) => {
 
 exports.getFollowing = async(req, res) =>{
     try{
-        const userId = req.params.id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId).select("-password").populate("following", "username profilePic");
 
@@ -141,7 +138,7 @@ exports.getFollowing = async(req, res) =>{
 
 exports.getBlogByUser = async(req, res)=>{
     try{
-        const userId = req.user.id;
+        const userId = req.user._id;
 
         const blogs = await Blog.find({creator: userId}).populate("likes comments");
         

@@ -11,7 +11,7 @@ const {
     getBlogByUser
 } = require("../controller/userController");
 
-router.get("/", isLoggedIn, getUserProfile);
+router.get("/:id", isLoggedIn, getUserProfile);
 
 router.put("/update", isLoggedIn, updateProfile);
 

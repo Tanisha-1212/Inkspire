@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom"; 
-import { useBlogs } from "../context/BlogContext";
+import { useBlogs } from "../context/blogContext";
 
 export default function ExplorePage() {
   const { blogs, loading, fetchAllBlogs } = useBlogs();
