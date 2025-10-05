@@ -8,6 +8,11 @@ export default function Navbar() {
 
   if (loading) return null; // wait until auth state is ready
 
+  const handleLogout = () => {
+    logout(); // perform logout
+    navigate("/"); // redirect to home page
+  };
+
   return (
     <nav className="flex justify-between items-center bg-black p-5">
       {/* Logo */}
@@ -42,7 +47,7 @@ export default function Navbar() {
               Profile
             </Link>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="hover:text-green-400 transition-colors transform hover:scale-110"
             >
               Logout
@@ -75,3 +80,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
