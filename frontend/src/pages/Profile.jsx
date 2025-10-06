@@ -159,34 +159,7 @@ export default function Profile() {
 
             </div>
           )}
-          {/* Show follow button only if viewing another user's profile */}
-          {currentUser._id !== profile._id && (
-          <button
-            onClick={async () => {
-              try {
-                // Check if currentUser is in followers
-                const isFollowing = followers.some((f) => f._id === currentUser._id);
 
-                if (isFollowing) {
-                  await unfollow(profile._id); // context function
-                } else {
-                  await follow(profile._id); // context function
-                }
-
-                await fetchFollowers(profile._id); // refresh followers
-              } catch (err) {
-                console.error("Follow/unfollow failed:", err);
-              }
-            }}
-            className={`ml-4 px-4 py-2 rounded-md font-semibold transition ${
-              followers.some((f) => f._id === currentUser._id)
-                ? "bg-gray-700 text-white hover:bg-gray-600"
-                : "bg-green-400 text-black hover:bg-green-500"
-            }`}
-          >
-            {followers.some((f) => f._id === currentUser._id) ? "Unfollow" : "Follow"}
-          </button>
-        )}
 
       <div className="flex gap-4 mt-2 items-center">
         <span className="text-gray-400">Followers: {followers.length}</span>

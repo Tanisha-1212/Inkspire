@@ -140,7 +140,9 @@ exports.getBlogByUser = async(req, res)=>{
     try{
         const userId = req.user._id;
 
-        const blogs = await Blog.find({creator: userId}).populate("likes comments");
+        const blogs = await Blog.find({creator: userId})
+        .populate("likedBy", "username profilePic")
+        .populate("comments", "text creator");
         
         res.status(200).json({blogs});
     }

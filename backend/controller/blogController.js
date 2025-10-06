@@ -151,7 +151,7 @@ exports.getBlogByFilter = async(req, res) => {
         const blogs = await Blog.find(filter)
         .populate("creator", "username profilePic")
         .populate("likedBy", "username profilePic")
-        .populate("comments", "text creator");
+        .populate("comments", "content creator");
 
         res.status(200).json({ blogs });
     }catch(err){
