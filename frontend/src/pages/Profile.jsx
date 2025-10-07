@@ -4,7 +4,7 @@ import { useAuth } from "../context/authContext";
 import { useUser } from "../context/userContext";
 import { useBlogs } from "../context/blogContext";
 import { useNotifications } from "../context/NotificationContext";
-import { Heart } from "lucide-react";
+import { Heart, Bell } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export default function Profile() {
     fetchUserBlogs,
     updateUserProfile,
     follow,
-    unfollow
+    unfollow,
   } = useUser();
 
   // Blogs + Notifications
@@ -39,7 +39,10 @@ export default function Profile() {
   const [editBio, setEditBio] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
 
-  // Fetch profile data for current user only
+  // Toggle notification dashboard
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Fetch profile data
   useEffect(() => {
     if (!currentUser) {
       navigate("/login");
@@ -97,24 +100,80 @@ export default function Profile() {
   };
 
   if (loading)
-    return <div className="text-center text-green-400 mt-20">Loading profile...</div>;
+    return (
+      <div className="text-center text-green-400 mt-20">Loading profile...</div>
+    );
   if (!profile)
-    return <div className="text-center text-red-500 mt-20">User not found.</div>;
+    return (
+      <div className="text-center text-red-500 mt-20">User not found.</div>
+    );
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10">
+    <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10 relative">
+      {/* 🔔 Notification Icon */}
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={() => setShowNotifications(!showNotifications)}
+          className="relative p-2 rounded-full bg-gray-900 border border-green-400 hover:bg-green-400 hover:text-black transition"
+        >
+          <Bell className="w-6 h-6" />
+          {notifications.some((n) => !n.read) && (
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          )}
+        </button>
+
+        {/* Notification Dashboard */}
+        {showNotifications && (
+          <div className="absolute right-0 mt-3 w-80 bg-gray-900 border border-green-400 rounded-xl shadow-lg shadow-green-400/30 overflow-hidden z-50">
+            <div className="p-3 border-b border-green-400 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-green-400">
+                Notifications
+              </h3>
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="text-gray-400 hover:text-green-400 text-sm"
+              >
+                Close
+              </button>
+            </div>
+            <div className="max-h-64 overflow-y-auto p-3 space-y-2">
+              {notifications.length === 0 ? (
+                <p className="text-gray-400 text-sm text-center">
+                  No notifications yet.
+                </p>
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`p-2 rounded-md text-sm ${
+                      n.read ? "bg-gray-800 text-gray-300" : "bg-green-400 text-black"
+                    }`}
+                  >
+                    {n.message}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Profile Header */}
-      <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
+      <div className="flex flex-col md:flex-row items-center gap-6 mb-8 mt-8">
         <img
-          src={profile.avatar || "/default-avatar.png"}
+          src={profile.profilePic || "/default-avatar.png"}
           alt={profile.username}
           className="w-28 h-28 rounded-full object-cover border-2 border-green-400"
         />
         <div>
           {!editing ? (
             <>
-              <h1 className="text-3xl font-bold text-green-400">{profile.username}</h1>
-              <p className="text-gray-400">{profile.bio || "No bio available."}</p>
+              <h1 className="text-3xl font-bold text-green-400">
+                {profile.username}
+              </h1>
+              <p className="text-gray-400">
+                {profile.bio || "No bio available."}
+              </p>
               <button
                 onClick={() => setEditing(true)}
                 className="mt-2 px-4 py-2 bg-green-400 text-black rounded-md font-semibold hover:bg-green-500 transition"
@@ -156,38 +215,15 @@ export default function Profile() {
                   Cancel
                 </button>
               </div>
-
             </div>
           )}
 
-
-      <div className="flex gap-4 mt-2 items-center">
-        <span className="text-gray-400">Followers: {followers.length}</span>
-        <span className="text-gray-400">Following: {following.length}</span>
-
+          <div className="flex gap-4 mt-2 items-center">
+            <span className="text-gray-400">Followers: {followers.length}</span>
+            <span className="text-gray-400">Following: {following.length}</span>
+          </div>
         </div>
-    </div>
-
       </div>
-
-      {/* Notifications */}
-      {notifications.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-green-400 mb-4">Notifications</h2>
-          <ul className="space-y-2">
-            {notifications.map((n) => (
-              <li
-                key={n.id}
-                className={`p-3 rounded-md ${
-                  n.read ? "bg-gray-900" : "bg-green-400 text-black"
-                }`}
-              >
-                {n.message}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* User Blogs */}
       <div>

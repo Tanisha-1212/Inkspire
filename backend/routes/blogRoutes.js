@@ -22,7 +22,7 @@ router.put("/:id", isLoggedIn, updateBlog);
 
 router.delete("/:id", isLoggedIn, deleteBlog);
 
-router.post("/:id/like", isLoggedIn, likeBlog);
+router.put("/:id/like", isLoggedIn, likeBlog);
 
 router.get("/filter", getBlogByFilter);
 

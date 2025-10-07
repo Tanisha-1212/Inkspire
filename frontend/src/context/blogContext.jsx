@@ -83,13 +83,15 @@ export const BlogProvider = ({ children }) => {
   };
 
   // ✅ Like a blog
-  const likeBlogPost = async (id) => {
+    const likeBlogPost = async (id) => {
     try {
-      const likes = await likeBlog(id);
+      const likesCount = await likeBlog(id);
       setBlogs((prev) =>
-        prev.map((b) => (b._id === id ? { ...b, likes } : b))
+        prev.map((b) =>
+          b._id === id ? { ...b, totalLikes: likesCount } : b
+        )
       );
-      return likes;
+      return likesCount;
     } catch (err) {
       console.error("Failed to like blog:", err);
       throw err;

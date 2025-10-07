@@ -15,6 +15,7 @@ export default function SingleBlogPage() {
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Load blog and comments
   useEffect(() => {
     const loadBlog = async () => {
       setLoading(true);
@@ -34,16 +35,31 @@ export default function SingleBlogPage() {
     loadBlog();
   }, [id]);
 
+  // Handle like/unlike
   const handleLike = async () => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
     if (!blog) return;
-    const updatedLikes = await likeBlogPost(blog._id);
-    setBlog({ ...blog, totalLikes: updatedLikes.length });
+
+    try {
+      const likesCount = await likeBlogPost(blog._id); // API returns updated likes count
+
+      let updatedLikedBy = [...(blog.likedBy || [])];
+      if (updatedLikedBy.includes(user._id)) {
+        updatedLikedBy = updatedLikedBy.filter((id) => id !== user._id);
+      } else {
+        updatedLikedBy.push(user._id);
+      }
+
+      setBlog({ ...blog, totalLikes: likesCount, likedBy: updatedLikedBy });
+    } catch (err) {
+      console.error("Failed to like blog:", err);
+    }
   };
 
+  // Add a comment
   const handleAddComment = async () => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -61,9 +77,7 @@ export default function SingleBlogPage() {
   };
 
   const handleCommentFocus = () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
+    if (!isAuthenticated) navigate("/login");
   };
 
   if (loading) return <div className="text-center text-green-400 mt-20">Loading blog...</div>;
@@ -94,15 +108,16 @@ export default function SingleBlogPage() {
       <div className="flex items-center gap-2 mb-6">
         <button
           onClick={handleLike}
-          disabled={!isAuthenticated} // disable for non-logged-in users
-          className={`flex items-center gap-2 transition ${
-            isAuthenticated
-              ? "text-green-400 hover:text-green-500"
-              : "text-gray-600 cursor-not-allowed"
-          }`}
+          disabled={!isAuthenticated}
+          className="flex items-center gap-2 transition"
         >
-          <Heart className="w-5 h-5" />
-          <span>{blog.totalLikes || 0}</span>
+          <Heart
+            className={`w-6 h-6 transition-all ${
+              blog.likedBy?.includes(user._id) ? "text-red-500" : "text-green-400"
+            }`}
+            fill={blog.likedBy?.includes(user._id) ? "red" : "none"}
+          />
+          <span className="text-gray-300">{blog.totalLikes || 0}</span>
         </button>
       </div>
 
@@ -140,16 +155,21 @@ export default function SingleBlogPage() {
           <p className="text-gray-400">No comments yet.</p>
         ) : (
           comments.map((c) => (
-            <div key={c._id} className="border-b border-gray-700 py-3">
-              <p className="text-gray-300">
-                <img
-                  src={c.creator?.profilePic || "/default-avatar.png"}
-                  alt={c.creator?.username || "User"}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <span className="text-green-400 font-semibold">{c.creator?.username}:</span>{" "}
-                {c.content}
-              </p>
+            <div key={c._id} className="border-b border-gray-700 py-3 flex items-start gap-3">
+              <img
+                src={c.creator?.profilePic || "/default-avatar.png"}
+                alt={c.creator?.username || "User"}
+                className="w-8 h-8 rounded-full object-cover mt-1"
+              />
+              <div>
+                <p>
+                  <span className="text-green-400 font-semibold">{c.creator?.username}:</span>{" "}
+                  {c.content}
+                </p>
+                <p className="text-gray-500 text-xs">
+                  {new Date(c.createdAt).toLocaleString()}
+                </p>
+              </div>
             </div>
           ))
         )}
@@ -157,5 +177,3 @@ export default function SingleBlogPage() {
     </div>
   );
 }
-
-
