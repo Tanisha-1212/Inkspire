@@ -2,31 +2,35 @@ const Blog = require("../models/Blog");
 const Like = require('../models/Like');
 
 exports.createBlog = async (req, res) => {
-    try{
-        const {title, description, pictures, tags, category} = req.body;
+  try {
+    const { title, description, tags, category } = req.body;
 
-        if(!description || !pictures || pictures.length === 0){
-            return res.status(400).json({message: "Description and pictures are required"});
-        }
+    // If you're using Multer for multiple images:
+    const pictures = req.files ? req.files.map(file => file.path) : [];
 
-        const blog = await Blog.create({
-            title,
-            description,
-            pictures,
-            tags,
-            category,
-            creator: req.user.id,
-            date: Date.now(),
-            likes: [],
-            comments: []
-        });
-
-        res.status(201).json({blog});
+    if (!description || pictures.length === 0) {
+      return res.status(400).json({ message: "Description and pictures are required" });
     }
-    catch(err){
-        return res.status(500).json({message: "Server error", error: err.message});
-    }
+
+    const blog = await Blog.create({
+      title,
+      description,
+      pictures, // these are file paths
+      tags: tags ? JSON.parse(tags) : [], // if frontend sends JSON-stringified tags
+      category,
+      creator: req.user.id,
+      date: Date.now(),
+      likes: [],
+      comments: [],
+    });
+
+    res.status(201).json({ blog });
+  } catch (err) {
+    console.error("Error creating blog:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
 };
+
 
 
 exports.getAllBlogs = async(req, res) => {

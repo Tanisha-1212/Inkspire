@@ -58,11 +58,11 @@ export default function LandingPage() {
         <div className="flex justify-center gap-6 flex-wrap">
           {categories.map((cat, i) => (
             <Link
-              key={category.name}
-              to={`/category/${category.name}`}
+              key={i}
+              to={`/category/${cat}`} // use the string directly
               className="p-6 border border-green-400 rounded-xl cursor-pointer hover:scale-105 transition"
             >
-              {category.name}
+              {cat}
             </Link>
           ))}
         </div>

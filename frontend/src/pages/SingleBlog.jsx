@@ -113,9 +113,9 @@ export default function SingleBlogPage() {
         >
           <Heart
             className={`w-6 h-6 transition-all ${
-              blog.likedBy?.includes(user._id) ? "text-red-500" : "text-green-400"
+              blog.likedBy?.includes(user._id) ? "text-green-400" : "text-green-400"
             }`}
-            fill={blog.likedBy?.includes(user._id) ? "red" : "none"}
+            fill={blog.likedBy?.includes(user._id) ? "#68d391" : "none"}
           />
           <span className="text-gray-300">{blog.totalLikes || 0}</span>
         </button>

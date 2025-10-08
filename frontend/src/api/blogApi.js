@@ -1,13 +1,27 @@
 import API from "./api";
 
-export const createBlog = async (data) => {
-    try {
-        const response = await API.post("/blogs", data);
-        return response.data.blog;
-    } catch (err) {
-        console.error("Error Create Blog", err);
-        throw err.response?.data || {message: "Failed to create blogs"};
+export const createBlog = async (blogData) => {
+  try {
+    const formData = new FormData();
+    formData.append("title", blogData.title);
+    formData.append("description", blogData.description);
+    formData.append("category", blogData.category);
+    formData.append("tags", JSON.stringify(blogData.tags || []));
+    if (blogData.image) {
+      formData.append("image", blogData.image); // ✅ match backend field
     }
+
+    const response = await API.post("/blogs", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data.blog;
+  } catch (err) {
+    console.error("Error creating blog:", err);
+    throw err.response?.data || err;
+  }
 };
 
 export const getAllBlogs = async (data) => {
@@ -52,7 +66,7 @@ export const deleteBlog = async (id) => {
 
 export const likeBlog = async (id) => {
     try {
-        const response = await API.post(`/blogs/${id}/like`);
+        const response = await API.put(`/blogs/${id}/like`);
         return response.data.likesCount;
     } catch (err) {
         console.error("Error liking Blogs", err);

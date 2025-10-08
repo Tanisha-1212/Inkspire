@@ -11,8 +11,9 @@ const {
     getBlogByFilter,
     getBlogLikes
 } = require("../controller/blogController");
+const upload = require("../utils/upload");
 
-router.post("/", isLoggedIn, createBlog);
+router.post("/", isLoggedIn, upload.single("image"), createBlog);
 
 router.get("/", getAllBlogs);
 

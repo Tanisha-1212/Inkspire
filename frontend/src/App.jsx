@@ -9,6 +9,7 @@ import Profile from "./pages/Profile"
 import NotFound from "./pages/NotFound"
 import SingleBlog from "./pages/SingleBlog"
 import Category from "./pages/category"
+import CreateBlog from "./pages/CreateBlog"
 
 
 // Components
@@ -41,6 +42,8 @@ export default function App() {
             <Route path="/profile" element={<Profile/>} />
 
             <Route path="/category/:categoryName" element={<Category />} />
+
+            <Route path="create-blog" element={<CreateBlog/>}/>
 
             {/* 404 Page */}
             <Route path="/notFound" element={<NotFound />} />

@@ -4,15 +4,12 @@ import { useAuth } from "../context/authContext";
 import { useUser } from "../context/userContext";
 import { useBlogs } from "../context/blogContext";
 import { useNotifications } from "../context/NotificationContext";
-import { Heart, Bell } from "lucide-react";
+import { Heart, Bell, PlusCircle } from "lucide-react"; // ✅ Added PlusCircle
 
 export default function Profile() {
   const navigate = useNavigate();
 
-  // Current logged-in user
   const { user: currentUser } = useAuth();
-
-  // User context
   const {
     profile,
     followers,
@@ -26,23 +23,16 @@ export default function Profile() {
     follow,
     unfollow,
   } = useUser();
-
-  // Blogs + Notifications
   const { likeBlogPost } = useBlogs();
   const { notifications, fetchNotifications } = useNotifications();
 
   const [loading, setLoading] = useState(true);
-
-  // Edit profile state
   const [editing, setEditing] = useState(false);
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
-
-  // Toggle notification dashboard
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Fetch profile data
   useEffect(() => {
     if (!currentUser) {
       navigate("/login");
@@ -67,7 +57,6 @@ export default function Profile() {
     loadProfileData();
   }, [currentUser]);
 
-  // Sync edit form with profile data
   useEffect(() => {
     if (profile) {
       setEditUsername(profile.username);
@@ -76,7 +65,6 @@ export default function Profile() {
     }
   }, [profile]);
 
-  // Like handler
   const handleLike = async (blogId) => {
     if (!currentUser) {
       navigate("/login");
@@ -85,7 +73,6 @@ export default function Profile() {
     await likeBlogPost(blogId);
   };
 
-  // Update profile
   const handleProfileUpdate = async () => {
     try {
       await updateUserProfile({
@@ -110,8 +97,9 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10 relative">
-      {/* 🔔 Notification Icon */}
-      <div className="absolute top-6 right-6">
+      {/* 🔔 Notification + ➕ Create Blog Icons */}
+      <div className="absolute top-6 right-6 flex flex-col items-center gap-3">
+        {/* Notification Button */}
         <button
           onClick={() => setShowNotifications(!showNotifications)}
           className="relative p-2 rounded-full bg-gray-900 border border-green-400 hover:bg-green-400 hover:text-black transition"
@@ -122,9 +110,18 @@ export default function Profile() {
           )}
         </button>
 
+        {/* ➕ Create Blog Button */}
+        <button
+          onClick={() => navigate("/create-blog")}
+          className="p-2 rounded-full bg-gray-900 border border-green-400 hover:bg-green-400 hover:text-black transition"
+          title="Create New Blog"
+        >
+          <PlusCircle className="w-6 h-6" />
+        </button>
+
         {/* Notification Dashboard */}
         {showNotifications && (
-          <div className="absolute right-0 mt-3 w-80 bg-gray-900 border border-green-400 rounded-xl shadow-lg shadow-green-400/30 overflow-hidden z-50">
+          <div className="absolute right-0 mt-14 w-80 bg-gray-900 border border-green-400 rounded-xl shadow-lg shadow-green-400/30 overflow-hidden z-50">
             <div className="p-3 border-b border-green-400 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-green-400">
                 Notifications
@@ -146,7 +143,9 @@ export default function Profile() {
                   <div
                     key={n.id}
                     className={`p-2 rounded-md text-sm ${
-                      n.read ? "bg-gray-800 text-gray-300" : "bg-green-400 text-black"
+                      n.read
+                        ? "bg-gray-800 text-gray-300"
+                        : "bg-green-400 text-black"
                     }`}
                   >
                     {n.message}
@@ -277,3 +276,4 @@ export default function Profile() {
     </div>
   );
 }
+
