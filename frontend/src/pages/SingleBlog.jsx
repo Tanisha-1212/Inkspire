@@ -44,7 +44,7 @@ export default function SingleBlogPage() {
     if (!blog) return;
 
     try {
-      const likesCount = await likeBlogPost(blog._id); // API returns updated likes count
+      const likesCount = await likeBlogPost(blog._id);
 
       let updatedLikedBy = [...(blog.likedBy || [])];
       if (updatedLikedBy.includes(user._id)) {
@@ -87,7 +87,21 @@ export default function SingleBlogPage() {
     <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10">
       {/* Blog Header */}
       <h1 className="text-4xl md:text-5xl font-bold text-green-400 mb-4">{blog.title}</h1>
-      <p className="text-gray-300 mb-2">By {blog.creator?.name || "Unknown"}</p>
+
+      <p className="text-gray-300 mb-2">
+        By{" "}
+        {blog.creator ? (
+          <span
+            className="text-green-400 cursor-pointer hover:underline"
+            onClick={() => navigate(`/profile?userId=${blog.creator._id}`)}
+          >
+            {blog.creator.username}
+          </span>
+        ) : (
+          "Unknown"
+        )}
+      </p>
+
       <p className="text-sm text-gray-400 mb-6">
         {new Date(blog.createdAt).toLocaleDateString()}
       </p>
@@ -163,8 +177,17 @@ export default function SingleBlogPage() {
               />
               <div>
                 <p>
-                  <span className="text-green-400 font-semibold">{c.creator?.username}:</span>{" "}
-                  {c.content}
+                  {c.creator ? (
+                    <span
+                      className="text-green-400 font-semibold cursor-pointer hover:underline"
+                      onClick={() => navigate(`/profile?userId=${c.creator._id}`)}
+                    >
+                      {c.creator.username}
+                    </span>
+                  ) : (
+                    "Unknown"
+                  )}
+                  : {c.content}
                 </p>
                 <p className="text-gray-500 text-xs">
                   {new Date(c.createdAt).toLocaleString()}

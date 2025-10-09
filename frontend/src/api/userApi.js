@@ -11,14 +11,23 @@ export const getUserProfile = async (id) => {
 };
 
 export const updateProfile = async (data) => {
-    try {
-        const response = await API.put("/users/update", data);
-        return response.data.user;
-    } catch (err) {
-        console.error("Error Updating User Profile", err);
-        throw err.response?.data || {message: "Failed to Update user profile"};
-    }
+  try {
+    const formData = new FormData();
+    if (data.username) formData.append("username", data.username);
+    if (data.bio) formData.append("bio", data.bio);
+    if (data.profilePic) formData.append("profilePic", data.profilePic); // <--- must match field name
+
+    const response = await API.put("/users/update", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return response.data.user;
+  } catch (err) {
+    console.error("Error Updating User Profile", err);
+    throw err.response?.data || { message: "Failed to Update user profile" };
+  }
 };
+
 
 export  const followUser = async (id) => {
     try {

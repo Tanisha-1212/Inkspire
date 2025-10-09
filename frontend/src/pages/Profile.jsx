@@ -4,11 +4,10 @@ import { useAuth } from "../context/authContext";
 import { useUser } from "../context/userContext";
 import { useBlogs } from "../context/blogContext";
 import { useNotifications } from "../context/NotificationContext";
-import { Heart, Bell, PlusCircle } from "lucide-react"; // ✅ Added PlusCircle
+import { Heart, Bell, PlusCircle } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
-
   const { user: currentUser } = useAuth();
   const {
     profile,
@@ -20,8 +19,6 @@ export default function Profile() {
     fetchFollowing,
     fetchUserBlogs,
     updateUserProfile,
-    follow,
-    unfollow,
   } = useUser();
   const { likeBlogPost } = useBlogs();
   const { notifications, fetchNotifications } = useNotifications();
@@ -30,9 +27,11 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
-  const [editAvatar, setEditAvatar] = useState("");
+  const [editProfilePic, setEditProfilePic] = useState(null); // File object
+  const [previewProfilePic, setPreviewProfilePic] = useState(""); // Preview URL
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Load profile data
   useEffect(() => {
     if (!currentUser) {
       navigate("/login");
@@ -57,11 +56,12 @@ export default function Profile() {
     loadProfileData();
   }, [currentUser]);
 
+  // Set initial edit state
   useEffect(() => {
     if (profile) {
       setEditUsername(profile.username);
       setEditBio(profile.bio || "");
-      setEditAvatar(profile.avatar || "");
+      setPreviewProfilePic(profile.profilePic || "/default-avatar.png");
     }
   }, [profile]);
 
@@ -73,13 +73,24 @@ export default function Profile() {
     await likeBlogPost(blogId);
   };
 
+  // Handle file selection for avatar
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setEditProfilePic(file);
+      setPreviewProfilePic(URL.createObjectURL(file)); // Preview selected image
+    }
+  };
+
+  // Update profile
   const handleProfileUpdate = async () => {
     try {
-      await updateUserProfile({
-        username: editUsername,
-        bio: editBio,
-        avatar: editAvatar,
-      });
+      const formData = new FormData();
+      formData.append("username", editUsername);
+      formData.append("bio", editBio);
+      if (editProfilePic) formData.append("profilePic", editProfilePic);
+
+      await updateUserProfile(formData); // Your context should handle FormData
       setEditing(false);
     } catch (err) {
       console.error("Profile update failed:", err);
@@ -88,18 +99,20 @@ export default function Profile() {
 
   if (loading)
     return (
-      <div className="text-center text-green-400 mt-20">Loading profile...</div>
+      <div className="bg-black min-h-screen text-center text-green-400">
+        Loading profile...
+      </div>
     );
+
   if (!profile)
     return (
       <div className="text-center text-red-500 mt-20">User not found.</div>
     );
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 md:px-12 py-10 relative">
+    <div className="min-h-screen bg-black text-white px-6 md:px-12 py-2 relative flex flex-col">
       {/* 🔔 Notification + ➕ Create Blog Icons */}
       <div className="absolute top-6 right-6 flex flex-col items-center gap-3">
-        {/* Notification Button */}
         <button
           onClick={() => setShowNotifications(!showNotifications)}
           className="relative p-2 rounded-full bg-gray-900 border border-green-400 hover:bg-green-400 hover:text-black transition"
@@ -110,7 +123,6 @@ export default function Profile() {
           )}
         </button>
 
-        {/* ➕ Create Blog Button */}
         <button
           onClick={() => navigate("/create-blog")}
           className="p-2 rounded-full bg-gray-900 border border-green-400 hover:bg-green-400 hover:text-black transition"
@@ -119,7 +131,6 @@ export default function Profile() {
           <PlusCircle className="w-6 h-6" />
         </button>
 
-        {/* Notification Dashboard */}
         {showNotifications && (
           <div className="absolute right-0 mt-14 w-80 bg-gray-900 border border-green-400 rounded-xl shadow-lg shadow-green-400/30 overflow-hidden z-50">
             <div className="p-3 border-b border-green-400 flex justify-between items-center">
@@ -160,7 +171,7 @@ export default function Profile() {
       {/* Profile Header */}
       <div className="flex flex-col md:flex-row items-center gap-6 mb-8 mt-8">
         <img
-          src={profile.profilePic || "/default-avatar.png"}
+          src={previewProfilePic}
           alt={profile.username}
           className="w-28 h-28 rounded-full object-cover border-2 border-green-400"
         />
@@ -195,9 +206,9 @@ export default function Profile() {
                 className="px-4 py-2 rounded-md bg-gray-900 text-white border border-green-400 focus:outline-none"
               />
               <input
-                value={editAvatar}
-                onChange={(e) => setEditAvatar(e.target.value)}
-                placeholder="Avatar URL"
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePicChange}
                 className="px-4 py-2 rounded-md bg-gray-900 text-white border border-green-400 focus:outline-none"
               />
               <div className="flex gap-2 mt-2">
@@ -276,4 +287,3 @@ export default function Profile() {
     </div>
   );
 }
-

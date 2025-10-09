@@ -24,10 +24,10 @@ export default function App() {
 
   return (
     <Router>
-      <div className="app-container">
+      <div className="app-container flex flex-col min-h-screen">
         <Navbar />
 
-        <main>
+        <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
 
@@ -39,7 +39,7 @@ export default function App() {
 
             <Route path="/blog/:id" element={<SingleBlog />} />
 
-            <Route path="/profile" element={<Profile/>} />
+            <Route path="/profile/:userId?" element={<Profile />} />
 
             <Route path="/category/:categoryName" element={<Category />} />
 
