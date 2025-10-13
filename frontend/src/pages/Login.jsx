@@ -1,111 +1,92 @@
-import { useState } from "react";
+import axios from "axios";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/authContext";
-import DotsBackground from "../components/DotsBackground";
+import { toast } from "react-toastify";
+import { StoreContext } from "../context/StoreContext";
 
-export default function LoginPage() {
-  const { login } = useAuth(); 
+const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { loginUser } = useContext(StoreContext);
+  const token = localStorage.getItem("token");
+  const onChangeHandler = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setError("");
-
     try {
-      await login({ email, password }); // AuthContext expects object
-      navigate("/");
-    } catch (err) {
-      setError(err.message || "Failed to login");
+      setLoading(true);
+      const res = await axios.post(
+        "http://localhost:4000/user/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("res", res);
+      if (res.data.success) {
+        const { user, token } = res.data;
+        loginUser(user, token);
+        toast.success(res.data.message);
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
-    <div className="h-[90vh] relative z-10 flex items-center justify-center bg-black text-white px-4">
-        <DotsBackground/>
-      <div className="bg-black rounded-2xl  p-8 w-full max-w-md border border-green-400 shadow-lg shadow-green-400/30">
-        <h2 className="text-3xl font-bold text-center mb-6 text-white">
-           Login to Your <span className="text-green-400">Inkspire</span> Account
-        </h2>
-
-        {error && (
-          <div className="mb-4 text-red-400 text-sm text-center">{error}</div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm text-white mb-1"
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-black border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label
-                htmlFor="password"
-                className="block text-sm text-white"
-              >
-                Password
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-xs text-green-400 hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-black border border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full bg-green-400 text-black font-semibold py-2 rounded-lg hover:bg-green-500 transition-colors"
+    <div>
+      <div className="w-full bg-pink-200 py-12 mx-auto flex items-center justify-center ">
+        <div className="w-full bg-white max-w-md p-5 mx-auto py-6 border-1 border-gray-200 shadow-md">
+          <h1 className="text-lg font-bold text-center text-gray-700">
+            Login into your account!
+          </h1>
+          <form
+            onSubmit={submitHandler}
+            className="flex flex-col gap-5 mt-5 w-full"
           >
-            Login
-          </button>
-        </form>
+            <input
+              name="email"
+              value={formData.email}
+              onChange={onChangeHandler}
+              type="email"
+              placeholder="Your email"
+              className="w-full p-2 border border-gray-300 rounded outline-none"
+              required
+            />
+            <input
+              name="password"
+              value={formData.password}
+              onChange={onChangeHandler}
+              type="password"
+              placeholder="Your password"
+              className="w-full p-2 border border-gray-300 rounded outline-none"
+              required
+            />
 
-        {/* Divider */}
-        <div className="flex items-center justify-center my-6">
-          <span className="h-px w-16 bg-green-400" />
-          <span className="px-3 text-sm text-gray-400">OR</span>
-          <span className="h-px w-16 bg-green-400" />
+            <button className="bg-orange-600 text-white px-6 py-2 w-full cursor-pointer">
+              Signin
+            </button>
+          </form>
+          <p className="text-center mt-4">
+            Don't have an account?{" "}
+            <Link to={"/register"} className="text-orange-600 cursor-pointer">
+              Register Here
+            </Link>{" "}
+          </p>
         </div>
-
-        {/* Signup Link */}
-        <p className="text-center text-gray-400 text-sm">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-green-400 hover:underline">
-            Sign Up
-          </Link>
-        </p>
       </div>
     </div>
   );
-}
+};
+export default Login;

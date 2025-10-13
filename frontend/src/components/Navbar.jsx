@@ -1,83 +1,75 @@
-import React from "react";
-import { useAuth } from "../context/authContext";
-import { useNavigate, Link } from "react-router-dom";
-
-export default function Navbar() {
-  const { isAuthenticated, user, logout, loading } = useAuth();
-  const navigate = useNavigate();
-
-  if (loading) return null; // wait until auth state is ready
-
-  const handleLogout = () => {
-    logout(); // perform logout
-    navigate("/"); // redirect to home page
-  };
-
+import { Link } from "react-router-dom";
+import { assets } from "../assets/assets";
+import { useContext } from "react";
+import { StoreContext } from "../context/StoreContext";
+const Navbar = () => {
+  const { user, logoutUser } = useContext(StoreContext);
   return (
-    <nav className="flex justify-between items-center bg-black p-5">
-      {/* Logo */}
-      <div
-        className="text-green-400 text-2xl hover:text-green-400 font-mono cursor-pointer"
-        onClick={() => navigate("/")}
-      >
-        Inkspire
-      </div>
+    <nav className="bg-white p-4 stciky top-0">
+      <div className="flex container mx-auto justify-between items-center">
+        {/* logo */}
+        <div className="flex gap-2 items-center">
+          <Link to={"/"}>
+            <img src={assets.logo} alt="" />
+          </Link>
+          <p className="hidden sm:block text-2xl">
+            Meta <span className="font-bold text-2xl">Blog</span>
+          </p>
+        </div>
 
-      {/* Links */}
-      <div className="text-white flex gap-5 items-center">
-        <Link
-          to="/"
-          className="hover:text-green-400 transition-colors transform hover:scale-110"
-        >
-          Home
-        </Link>
-        <Link
-          to="/explore"
-          className="hover:text-green-400 transition-colors transform hover:scale-110"
-        >
-          Blogs
-        </Link>
+        {/* center content */}
+        <ul className="hidden sm:flex gap-5 text-xl font-normal justify-center items-center text-gray-700">
+          <Link
+            to="/"
+            className="cursor-pointer hover:text-orange-500 duration-300"
+          >
+            Home
+          </Link>
+          <Link
+            to="/blogs"
+            className="cursor-pointer hover:text-orange-500 duration-300"
+          >
+            Blogs
+          </Link>
+          <Link
+            to="/about"
+            className="cursor-pointer hover:text-orange-500 duration-300"
+          >
+            About
+          </Link>
+          <Link
+            to="/contact"
+            className="cursor-pointer hover:text-orange-500 duration-300"
+          >
+            Contact
+          </Link>
+        </ul>
 
-        {isAuthenticated ? (
-          <>
+        {user ? (
+          <div className="flex gap-2">
             <Link
-              to="/profile"
-              className="hover:text-green-400 transition-colors transform hover:scale-110"
+              to={"/dashboard"}
+              className="bg-black px-6 py-2 rounded-full text-white"
             >
-              Profile
+              Dashboard
             </Link>
             <button
-              onClick={handleLogout}
-              className="hover:text-green-400 transition-colors transform hover:scale-110"
+              onClick={logoutUser}
+              className="bg-orange-500 text-white px-6 py-2 rounded-full cursor-pointer hover:bg-orange-600 duration-300"
             >
               Logout
             </button>
-          </>
+          </div>
         ) : (
-          <>
-            <Link
-              to="/Signup"
-              className="hover:text-green-400 transition-colors transform hover:scale-110"
-            >
-              Signup
-            </Link>
-            <Link
-              to="/login"
-              className="hover:text-green-400 transition-colors transform hover:scale-110"
-            >
-              Login
-            </Link>
-          </>
+          <Link
+            to={"/login"}
+            className="bg-orange-500 text-white px-8 py-2 rounded-full cursor-pointer hover:bg-orange-600 duration-300"
+          >
+            Signin
+          </Link>
         )}
       </div>
-
-      {/* Greeting */}
-      {isAuthenticated && (
-        <div className="ml-4 text-green-400 text-sm">
-          Hi, {user?.username || "User"}
-        </div>
-      )}
     </nav>
   );
-}
-
+};
+export default Navbar;
