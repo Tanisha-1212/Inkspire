@@ -4,3 +4,21 @@
 * {
   font-family: "Outfit", sans-serif;
 }
+
+@keyframes pulseDots {
+  0%, 100% {
+    background-size: 40px 40px;
+    opacity: 0.6;
+  }
+  50% {
+    background-size: 45px 45px;
+    opacity: 1;
+  }
+}
+
+.animate-pulseDots {
+  background: radial-gradient(circle, #97AF8F 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: pulseDots 2s infinite ease-in-out;
+}
+

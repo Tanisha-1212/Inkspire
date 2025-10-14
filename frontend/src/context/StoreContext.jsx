@@ -14,7 +14,7 @@ const StoreContextProvider = ({ children }) => {
   useEffect(() => {
     const allBolgs = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/blog/all");
+        const res = await axios.get("http://localhost:5000/blog/all");
 
         setBlogData(res.data.blogs);
       } catch (error) {

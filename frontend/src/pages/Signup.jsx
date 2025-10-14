@@ -28,7 +28,7 @@ const Signup = () => {
       data.append("image", formData.image);
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:4000/user/register",
+        "http://localhost:5000/user/register",
         data,
         {
           headers: {
@@ -48,7 +48,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="w-full bg-pink-200 py-12 mx-auto flex items-center justify-center ">
+    <div className="w-full  py-12 mx-auto flex items-center justify-center ">
       <div className="w-full bg-white max-w-md p-5 mx-auto py-6 border-1 border-gray-200 shadow-md">
         <h1 className="text-lg font-bold text-center text-gray-700">
           Create your account!
@@ -88,6 +88,7 @@ const Signup = () => {
             onChange={fileHandler}
             accept="image/*"
             type="file"
+            placeholder="Profile Picture"
             className="w-full p-2 border border-gray-300 rounded outline-none"
             required
           />
